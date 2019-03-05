@@ -11,19 +11,22 @@ import (
     		"net/http"
 		)
 
-const TRIGGER   = 18
-const ECHO      = 24
-const RED_LED   = 23
-const GREEN_LED = 25
+//pins are using BCM layout
+const TRIGGER     = 18
+const ECHO        = 24
+const RED_LED     = 23
+const GREEN_LED   = 25
+const MIN_DIST    = 200 //minimum obstacle distance in mm
+const SOUND_SPEED float64 = 0.00034 //millimeters per nanosecond
 
 var (
-	trigger_pin = rpio.Pin(TRIGGER)
-	echo_pin    = rpio.Pin(ECHO)
-	red_pin     = rpio.Pin(RED_LED)
-	green_pin   = rpio.Pin(GREEN_LED)
-	previous_dist float64
-
+	trigger_pin   = rpio.Pin(TRIGGER)
+	echo_pin      = rpio.Pin(ECHO)
+	red_pin       = rpio.Pin(RED_LED)
+	green_pin     = rpio.Pin(GREEN_LED)
+	previous_dist float64 = 20000 //initialze with some big value for first loop
 )
+
 func main() {
 	if err := rpio.Open(); err != nil {
 		fmt.Println(err)
@@ -34,9 +37,13 @@ func main() {
 	pin_setup()    
     for {
     	dist := distance()
-    	fmt.Println("Distance in mm:")
-    	fmt.Println(dist)
-    	time.Sleep(1 * time.Second)
+    	if dist < MIN_DIST && dist < previous_dist {
+    		stop_the_car()
+    		fmt.Println("Distance in mm:")
+    		fmt.Println(dist)
+    	}
+	    previous_dist = dist
+    	time.Sleep(5 * time.Microsecond)
     }
 }
 
@@ -72,8 +79,6 @@ func stop_the_car() {
 }
 
 func distance() (distance float64) {
-	trigger_pin.Low()
-	time.Sleep(5 * time.Microsecond)
 	trigger_pin.High()
 	time.Sleep(10 * time.Microsecond)
 	trigger_pin.Low()
@@ -88,11 +93,6 @@ func distance() (distance float64) {
 	}
 
 	time_elapsed := stop.Sub(start)
-	distance = (float64(time_elapsed) / 2) * float64(0.00034)
-	if previous_dist==0 { previous_dist = distance }
-	if distance < 200 && distance < previous_dist {
-    	stop_the_car()
-    }
-    previous_dist = distance
+	distance = (float64(time_elapsed) / 2) * SOUND_SPEED
 	return distance
 }
