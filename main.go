@@ -44,7 +44,7 @@ func main() {
             fmt.Println(dist)
         }
         previous_dist = dist
-        time.Sleep(time.Second /)
+        time.Sleep(time.Second / 10)
     }
 }
 
