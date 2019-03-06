@@ -32,7 +32,7 @@
                     "collision_avoidance": {
                         "type": "docker",
                         "settings": {
-                            "image": "vpacher/collision_avoidance:0.9",
+                            "image": "vpacher/collision_avoidance:1.1",
                             "createOptions": "{\"ExposedPorts\":{\"8080/tcp\":{}},\"HostConfig\":{\"Privileged\":true,\"PortBindings\":{\"8080/tcp\":[{\"HostPort\":\"8080\"}]}}}"
                         },
                         "status": "running",

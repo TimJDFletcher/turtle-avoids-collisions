@@ -43,7 +43,7 @@ func main() {
     		fmt.Println(dist)
     	}
 	    previous_dist = dist
-    	time.Sleep(5 * time.Microsecond)
+    	time.Sleep(time.Second / 10)
     }
 }
 
