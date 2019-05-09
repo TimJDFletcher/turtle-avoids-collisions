@@ -81,23 +81,3 @@ func stop_the_car() {
         fmt.Println(string(data))
     }
 }
-
-func distance() (distance float64) {
-    trigger_pin.High()
-    time.Sleep(10 * time.Microsecond)
-    trigger_pin.Low()
-    
-    start := time.Now()
-    stop  := time.Now()
-
-    for echo_pin.Read() == rpio.Low {
-        start = time.Now()
-    }
-    for echo_pin.Read() == rpio.High {
-        stop = time.Now()   
-    }
-
-    time_elapsed := stop.Sub(start)
-    distance = (float64(time_elapsed) / 2) * SOUND_SPEED
-    return distance
-}
