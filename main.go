@@ -81,3 +81,7 @@ func stop_the_car() {
         fmt.Println(string(data))
     }
 }
+
+func distance() (distance float64) {
+    return distance
+}
