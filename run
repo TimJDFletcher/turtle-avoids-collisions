@@ -1,0 +1,46 @@
+#!/bin/bash
+
+configure_cross_comp()
+{
+    export GOOS=linux
+    export GOARCH=arm
+    export GOARM=7
+}
+
+configure_go()
+{
+    export GOPATH="${HOME}/.go"
+    export GOROOT="$(brew --prefix golang)/libexec"
+    export PATH="$PATH:${GOPATH}/bin:${GOROOT}/bin"
+    test -d "${GOPATH}" || mkdir "${GOPATH}"
+}
+
+_build()
+{
+    configure_cross_comp
+    configure_go
+    go build -o cavoidance
+    docker build -t turtle-avoids-collisions:tmp .
+}
+
+_push()
+{
+    _build
+    docker push timjdfletcher/turtle-avoids-collisions
+}
+
+_deploy()
+{
+    _push
+    az login
+    az iot edge set-modules --device-id car1 --hub-name TWiotHub --content ./module_deployment.json
+}
+
+CMD=${1:-}
+shift || true
+case $CMD in 
+    build) _build ;;
+    push) _push ;;
+    deploy) _deploy ;;
+    * ) usage ;;
+esac
