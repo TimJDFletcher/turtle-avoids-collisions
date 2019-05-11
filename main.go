@@ -66,5 +66,6 @@ func stop_the_car() {
 
 func distance() (distance float64) {
     trigger_pin.High()
+    // echo_pin.Read() == rpio.High
     return distance
 }
