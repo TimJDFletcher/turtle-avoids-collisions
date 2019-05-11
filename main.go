@@ -14,16 +14,13 @@ import (
 //pins are using BCM layout
 const TRIGGER     = 18
 const ECHO        = 24
-const RED_LED     = 23
-const GREEN_LED   = 25
 const MIN_DIST    = 200 //minimum obstacle distance in mm
 const SOUND_SPEED float64 = 0.00034 //millimeters per nanosecond
+const STOP_URL    = "http://192.168.4.1:5000/move"
 
 var (
     trigger_pin   = rpio.Pin(TRIGGER)
     echo_pin      = rpio.Pin(ECHO)
-    red_pin       = rpio.Pin(RED_LED)
-    green_pin     = rpio.Pin(GREEN_LED)
     previous_dist float64 = 20000 //initialze with some big value for first loop
 )
 
@@ -51,28 +48,13 @@ func main() {
 func pin_setup() {
     trigger_pin.Output()
     echo_pin.Input()
-    red_pin.Output()
-    green_pin.Output()
-  
-    for x := 0; x < 5; x++ {
-        red_pin.Toggle()
-        time.Sleep(time.Second / 5)
-    }
-  
-    for x := 0; x < 5; x++ {
-        green_pin.Toggle()
-        time.Sleep(time.Second / 5)
-    }
-  
-    red_pin.Low()
-    green_pin.Low()
     trigger_pin.Low()
 }
 
 func stop_the_car() {
     jsonData := map[string]string{"direction": "stop", "speed": "0"}
     jsonValue, _ := json.Marshal(jsonData)
-    response, err := http.Post("http://192.168.4.1:5000/move", "application/json", bytes.NewBuffer(jsonValue))
+    response, err := http.Post(STOP_URL, "application/json", bytes.NewBuffer(jsonValue))
     
     if err != nil {
         fmt.Printf("The HTTP request failed with error %s\n", err)
@@ -83,5 +65,6 @@ func stop_the_car() {
 }
 
 func distance() (distance float64) {
+    trigger_pin.High()
     return distance
 }
