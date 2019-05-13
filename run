@@ -1,4 +1,5 @@
 #!/bin/bash
+export VERSION=$(date +%s)
 
 configure_cross_comp()
 {
@@ -20,20 +21,29 @@ _build()
     configure_cross_comp
     configure_go
     go build -o cavoidance
-    docker build -t turtle-avoids-collisions:tmp .
+    docker build -t timjdfletcher/turtle-avoids-collisions:${VERSION} .
 }
 
 _push()
 {
     _build
-    docker push timjdfletcher/turtle-avoids-collisions
+    docker push timjdfletcher/turtle-avoids-collisions:${VERSION}
+}
+
+template_deployment()
+{
+    sed -e s/_VERSION_/${VERSION}/g < ./module_deployment.json.tmpl
 }
 
 _deploy()
 {
     _push
-    az login
-    az iot edge set-modules --device-id car1 --hub-name TWiotHub --content ./module_deployment.json
+    FILE=$(mktemp) 
+    template_deployment > ${FILE}
+    az iot edge set-modules \
+        --device-id car1 \
+        --hub-name TWiotHub \
+        --content ${FILE}
 }
 
 CMD=${1:-}
