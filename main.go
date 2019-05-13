@@ -16,7 +16,7 @@ const TRIGGER     = 18
 const ECHO        = 24
 const MIN_DIST    = 200 //minimum obstacle distance in mm
 const SOUND_SPEED float64 = 0.00034 //millimeters per nanosecond
-const STOP_URL    = "http://192.168.4.1:5000/move"
+const STOP_URL    = "http://192.168.8.223:5000/move"
 
 var (
     trigger_pin   = rpio.Pin(TRIGGER)
@@ -31,8 +31,8 @@ func main() {
     }
     defer rpio.Close()
 
-    pin_setup()    
-    
+    pin_setup()
+
     for {
         dist := distance()
         if dist < MIN_DIST && dist < previous_dist {
@@ -55,7 +55,7 @@ func stop_the_car() {
     jsonData := map[string]string{"direction": "stop", "speed": "0"}
     jsonValue, _ := json.Marshal(jsonData)
     response, err := http.Post(STOP_URL, "application/json", bytes.NewBuffer(jsonValue))
-    
+
     if err != nil {
         fmt.Printf("The HTTP request failed with error %s\n", err)
     } else {
@@ -66,6 +66,12 @@ func stop_the_car() {
 
 func distance() (distance float64) {
     trigger_pin.High()
-    // echo_pin.Read() == rpio.High
-    return distance
+    time.Sleep(0.00001)
+    trigger_pin.Low()
+    pulse_start_time := time.Now().UnixNano()
+    for echo_pin != 1 {
+        time.Sleep(1)
+    }
+    pulse_stop_time := time.Now().UnixNano()
+    return (float64(pulse_stop_time) - float64(pulse_start_time)) * SOUND_SPEED / 2
 }
